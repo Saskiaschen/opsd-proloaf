@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 from matplotlib import pyplot as plt
 
+
 from proloaf import datahandler as dh
 from proloaf import modelhandler as mh
 from proloaf.confighandler import read_config
@@ -65,6 +66,12 @@ def predict(df: pd.DataFrame) -> list[pd.DataFrame]:
             index=ts_data.data.index[-model.forecast_horizon :],  # HINT: We only need the future portion of the index
             columns=[f"q{quant}" for quant in quantiles],
         )
+        pred_df.index = pd.date_range(
+            start=df.index[-1] + pd.to_timedelta(config["frequency"]),
+            periods=model.forecast_horizon,
+            freq=config["frequency"],
+        )
+
         if model.scalers is not None:
             # for col in pred_df.columns:
             pred_df = model.scalers.manual_inverse_transform(pred_df, scale_as=feat)
